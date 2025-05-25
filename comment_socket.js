@@ -10,7 +10,7 @@ const io = require("socket.io")(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST", "PUT", "PATCH"],
-    credentials: true
+    credentials: true,
   },
 
   // Definition of connection protocol
@@ -22,14 +22,15 @@ const io = require("socket.io")(server, {
   handlePreflightRequest: (req, res) => {
     // If successful, headers will be defined here.
     res.writeHead(200, {
-        // Accept all http, https
-        "Access-Control-Allow-Origin": "*",
-        // Accept method
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        // Access all type header
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
-        // Access none credentials
-        "Access-Control-Allow-Credentials": "true",
+      // Accept all http, https
+      "Access-Control-Allow-Origin": "*",
+      // Accept method
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      // Access all type header
+      "Access-Control-Allow-Headers":
+        "Content-Type, Authorization, X-Requested-With",
+      // Access none credentials
+      "Access-Control-Allow-Credentials": "true",
     });
     res.end();
   },
@@ -38,18 +39,19 @@ const io = require("socket.io")(server, {
 });
 // Initiate a new connection when there is an account connected to the server socket
 io.on("connection", (socket) => {
-  console.log("1 user connected");
+  // console.log("1 user connected");
   // Listen for events when an account sends data to the server socket
   socket.on("ClientSendMessageToServer", (requestData) => {
+    // console.log(requestData);
     // Define room name
     let roomName = "";
     if (requestData.type == "comment") {
       roomName = "room_" + requestData.post_id;
-    } 
+    }
     if (requestData.type == "message") {
       roomName = "room_" + requestData.roomId;
     }
-    switch (requestData.type) {
+    switch (requestData.action) {
       case "join":
         /**
          * Join a room, room name send from client
@@ -73,12 +75,13 @@ io.on("connection", (socket) => {
          */
         io.in(roomName).emit("ServerSendMessageToClient", requestData);
         break;
-      case "send-comment":
+      case "send_comment":
         /**
          * You don't need to store this room object anywhere, because it's already part of the io object.
          * You can then treat the room like its own socket instance.
          * Proceed to send information to all users listening in room
          */
+        // console.log(requestData);
         io.in(roomName).emit("ServerSendMessageToClient", requestData);
         break;
       default:
@@ -87,7 +90,7 @@ io.on("connection", (socket) => {
   });
   // Disconnect the user
   socket.on("disconnect", (socket) => {
-    console.log("a user disconnected");
+    // console.log("a user disconnected");
   });
 });
 // Init port listen
